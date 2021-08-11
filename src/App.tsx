@@ -10,7 +10,7 @@ import Navigation from './containers/Navigation/Navigation';
 import Footer from './containers/Footer/Footer';
 import VideoPlayer from './containers/VideoPlayer/VideoPlayer';
 
-function App() {
+function App() {  
   return (
     <Provider store={store}>
     <Router>

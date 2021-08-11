@@ -1,9 +1,13 @@
 // @ts-nocheck
 import React from 'react';
-import { Fragment, useState } from 'react'
+import { Fragment, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { useForm } from "react-hook-form";
+import { connect } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux';
 import firebase from '../../firebase';
+import { userActions } from '../../redux'
 import SearchIcon from '@material-ui/icons/Search';
 import { makeStyles } from '@material-ui/core/styles';
 import NotificationsIcon from '@material-ui/icons/Notifications';
@@ -26,6 +30,8 @@ import NearMeOutlinedIcon from '@material-ui/icons/NearMeOutlined';
 import PhoneIcon from '@material-ui/icons/Phone';
 import Logo from '../../images/logo.svg';
 import { Link } from 'react-router-dom';
+import FormError from '../../components/FormError';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { FaChevronDown, FaMapMarkerAlt } from "react-icons/fa";
 import {
   contact_head,
@@ -35,7 +41,8 @@ import {
   issue_question,
   please_choose_location,
   use_my_location,
-  otp_login
+  otp_login,
+  registration
 } from '../../constants/common';
 
 const useStyles = makeStyles({
@@ -52,18 +59,47 @@ function classNames(...classes: string[]) {
 
 function Navigation() {
   const classes = useStyles();
+  const location = useLocation();
   const [isLoggedIn, setisLoggedIn] = useState(false);
   const [modalOpen, setmodalOpen] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  // const [registration, setRegistration] = useState({});  
   const [modalAddressOpen, setmodalAddressOpen] = useState(false);
   const [modalLocationOpen, setmodalLocationOpen] = useState(false);
   const [modalLoginOpen, setmodalLoginOpen] = useState(false);
+  const [modalRegisterOpen, setmodalRegisterOpen] = useState(false);
   const [otpOpen, setOtpOpen] = useState(false);
   const [recaptchaClose, setrecaptchaClose] = useState(false);
   const { register, handleSubmit, formState: { errors }, } = useForm();
+  const loggedIn = useSelector(state => state.authentication.loggedIn);
+  const registering = useSelector(state => state.registration.registering);
+  // const accessToken = useSelector(state => state.authentication.user.data.accessToken);
+  const dispatch = useDispatch();
+
+  // login 
   const {
     register: register2,
     formState: { errors: errors2 },
     handleSubmit: handleSubmit2,
+  } = useForm({
+    mode: "onBlur",
+  });
+
+  //registration
+  const {
+    register: register3,
+    formState: { errors: errors3 },
+    handleSubmit: handleSubmit3,
+  } = useForm({
+    mode: "onBlur",
+  });
+  const {
+    register: register4,
+    formState: { errors: errors4 },
+    handleSubmit: handleSubmit4,
   } = useForm({
     mode: "onBlur",
   });
@@ -96,28 +132,22 @@ function Navigation() {
   const handleLoginClose = () => {
     setmodalLoginOpen(false);
   }
-
-  const setUpRecaptcha = () => {
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
-      "recaptcha-container",
-      {
-        size: "invisible",
-        callback: function (response) {
-          console.log("Captcha Resolved");
-          onSubmit();
-        },
-        defaultCountry: "IN",
-      }
-    );
-  };
+  const handleRegisterOpen = () => {
+    setmodalRegisterOpen(true);
+    setmodalLoginOpen(false);
+  }
+  const handleRegisterClose = () => {
+    setmodalRegisterOpen(false);
+  }
+  const handleLogout = () => {
+    dispatch(userActions.logout());
+  }
 
   const onSubmit = (data) => {
-    console.log("helllo ", data.mobileNumber);
     setOtpOpen(true);
+    setPhoneNumber(data.mobileNumber);
     var recaptcha = new firebase.auth.RecaptchaVerifier('recaptcha');
-
     let number = "+91" + data.mobileNumber;
-    console.log("flag of otp", number);
 
     firebase.auth().signInWithPhoneNumber(number, recaptcha).then(function (confirmationResult) {
       window.confirmationResult = confirmationResult;
@@ -128,15 +158,66 @@ function Navigation() {
     });
   };
 
+  const onRegistrationSubmit = (data) => {
+    console.log("registration form", data);
+    setOtpOpen(true);
+    setPhoneNumber(data.mobileNumber);
+    setFirstName(data.firstName);
+    setLastName(data.lastName);
+    setEmail(data.email);
+    var recaptcha = new firebase.auth.RecaptchaVerifier('recaptcha');
+    let number = "+91" + data.mobileNumber;
+
+    firebase.auth().signInWithPhoneNumber(number, recaptcha).then(function (confirmationResult) {
+      window.confirmationResult = confirmationResult;
+      setrecaptchaClose(true)
+      console.log("Otp Sent");
+    }).catch(function (error) {
+      console.log(error);
+    });
+  }
+
   const onVerifyCodeSubmit = (data) => {
     console.log("inside onverifySubmit", data);
     const verificationId = data ? data.otp : '0000';
-    console.log("inside onverifySubmit", verificationId);    
+    console.log("inside onverifySubmit", verificationId);
     let optConfirm = window.confirmationResult;
     optConfirm.confirm(verificationId)
       .then(function (result) {
         var user = result.user;
+        // userActions.login('9995452371');
+        const { from } = location.state || { from: { pathname: "/" } };
+        dispatch(userActions.login(phoneNumber, from));
         console.log("Result" + user.phoneNumber);
+      })
+      .catch(function (error) {
+        console.log(error);
+        alert("Incorrect OTP");
+      });
+  };
+
+  const onVerifyCodeRegistrationSubmit = (data) => {
+    console.log("inside onverifySubmit", data);
+    const verificationId = data.otp;
+    console.log("inside onverifySubmit", verificationId);
+    let optConfirm = window.confirmationResult;
+    optConfirm.confirm(verificationId)
+      .then(function (result) {
+        if (firstName && lastName && email && phoneNumber) {
+          const user = {
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            phone: phoneNumber
+          }
+          console.log("user data", user);
+          dispatch(userActions.register(user));
+        }
+        // var user = result.user;
+        // // userActions.login('9995452371');
+        // const { from } = location.state || { from: { pathname: "/" } };
+        // // dispatch(userActions.register(firstName,lastName,email,phoneNumber, from));
+        // console.log("Result" + user.phoneNumber);
       })
       .catch(function (error) {
         console.log(error);
@@ -415,7 +496,7 @@ function Navigation() {
                 </button>
 
                 {/* Profile dropdown */}
-                {isLoggedIn ?
+                {loggedIn ?
                   <div>
                     <Link className="flex-shrink-0 bg-white p-1  mx-3  text-gray-400 rounded-full hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-100">
                       <span className="sr-only">user profile</span>
@@ -452,17 +533,21 @@ function Navigation() {
                             </label>
                             <div className="mt-1 relative rounded-md shadow-sm w-1/2 mx-auto">
                               <input
-                                {...register("mobileNumber", { required: true, maxLength: 20 })}
+                                {...register("mobileNumber", {
+                                  required: true, pattern: {
+                                    value: /(7|8|9)\d{9}/,
+                                    message: 'Please enter a mobile number',
+                                  },
+                                })}
                                 type="text"
                                 name="mobileNumber"
                                 id="mobileNumber"
                                 className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                 placeholder="mobile number"
                               />
-                              {errors.mobileNumber?.type === 'required' &&
-                                <p className="mt-2 text-sm text-red-600 mx-auto " id="email-error">
-                                  Enter valid mobile number
-                                </p>}
+                              {errors.mobileNumber?.message && (
+                                <FormError errorMessage={errors.mobileNumber?.message} />
+                              )}
                             </div>
                             {!otpOpen && <div>
                               <div className="text-center mt-4 ">
@@ -485,7 +570,7 @@ function Navigation() {
                               />
                             </div>
                             <div className="text-center mt-4 ">
-                              <button type="submit"  class="uppercase bg-primary hover:bg-green-600 outline-none  text-white font-semibold py-2 px-4 border border-blue-700  rounded w-1/3 ">
+                              <button type="submit" class="uppercase bg-primary hover:bg-green-600 outline-none  text-white font-semibold py-2 px-4 border border-blue-700  rounded w-1/3 ">
                                 Login
                               </button>
                             </div>
@@ -496,21 +581,157 @@ function Navigation() {
                           </div>}
 
                           <div className="text-center pt-3">
-                              <button onClick={handleLoginOpen} class="text-xs  text-gray-400 font-semibold  px-4 ">
-                                Resend OTP
-                              </button>
-                            </div>
-                            <div className="text-center pt-3">
-                              <button onClick={handleLoginOpen} class="text-xs text-gray-400 font-semibold  px-4   ">
-                                Register
-                              </button>
-                            </div> 
+                            <button onClick={handleLoginOpen} class="text-xs  text-gray-400 font-semibold  px-4 ">
+                              Resend OTP
+                            </button>
+                          </div>
+                          <div className="text-center pt-3">
+                            <button onClick={handleRegisterOpen} class="text-xs text-gray-400 font-semibold  px-4   ">
+                              Register
+                            </button>
+                          </div>
 
                         </div>
                       </div>
                     </Dialog>
                   </div>
                 }
+
+                <Dialog
+                  open={modalRegisterOpen}
+                  onClose={handleRegisterClose}
+                  aria-labelledby="alert-dialog-title"
+                  aria-describedby="alert-dialog-description"
+                  borderRadius={16}
+                  className={classes.paper}
+                  fullWidth
+                  maxWidth="sm"
+                >
+                  <div className="py-6 pl-2">
+                    <div className="grid grid-cols-12 border-b-2 ">
+                      <div className=" pb-6 col-span-11 text-start">
+                        <span className="pb-4  font-semibold uppercase">{registration}</span>
+                      </div>
+                      <div className="pb-6 col-span-1 text-end">
+                        <CancelIcon className="h-6 w-6 text-red-500" aria-hidden="true" />
+                      </div>
+                    </div>
+                    <div>
+                      <form onSubmit={handleSubmit3(onRegistrationSubmit)} class="">
+                        <div className="mt-1 relative rounded-md shadow-sm w-1/2 mx-auto">
+                          <input
+                            {...register3("firstName", { required: true, maxLength: 20 })}
+                            type="text"
+                            name="firstName"
+                            id="firstName"
+                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            placeholder="First Name"
+                          />
+                          {errors3.firstName?.type === 'required' &&
+                            <FormError errorMessage='First name is required' />
+                          }
+                        </div>
+                        <div className="mt-1 relative rounded-md shadow-sm w-1/2 mx-auto">
+                          <input
+                            {...register3("lastName", { required: true, maxLength: 20 })}
+                            type="text"
+                            name="lastName"
+                            id="lastName"
+                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            placeholder="Last Number"
+                          />
+                          {errors3.lastName?.type === 'required' &&
+                            <FormError errorMessage='Last name is required' />
+                          }
+                        </div>
+                        <div className="mt-1 relative rounded-md shadow-sm w-1/2 mx-auto">
+                          <input
+                            {...register3("email", {
+                              required: "Email is required", pattern: {
+                                value: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                                message: 'Please enter a valid email',
+                              },
+                            })}
+                            type="text"
+                            name="email"
+                            id="email"
+                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            placeholder="Email"
+                          />
+                          {errors3.email?.message && (
+                            <FormError errorMessage={errors3.email?.message} />
+                          )}
+                        </div>
+                        <div className="mt-1 relative rounded-md shadow-sm w-1/2 mx-auto">
+                          <input
+                            {...register3("mobileNumber", {
+                              required: true, pattern: {
+                                value: /(7|8|9)\d{9}/,
+                                message: 'Please enter a mobile number',
+                              },
+                            })}
+                            type="text"
+                            name="mobileNumber"
+                            id="mobileNumber"
+                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            placeholder="Mobile Number"
+                          />
+                          {errors3.mobileNumber?.message && (
+                            <FormError errorMessage={errors3.mobileNumber?.message} />
+                          )}
+                        </div>
+                        <label htmlFor="registration" className="block text-sm font-medium text-gray-700 text-center py-4">
+                          By registering you agree to our
+                        </label>
+                        {!otpOpen && <div>
+                          <div className="text-center mt-4 ">
+                            <button type="submit" class="uppercase bg-primary hover:bg-green-600 outline-none  text-white font-semibold py-2 px-4 border border-blue-700  rounded w-1/3 ">
+                              Send otp
+                            </button>
+                          </div>
+                        </div>}
+                      </form>
+
+                      {otpOpen && <form onSubmit={handleSubmit4(onVerifyCodeRegistrationSubmit)} class="">
+                        <div className="mt-1 relative rounded-md shadow-sm w-1/2 mx-auto">
+                          <input
+                            {...register4("otp", { required: true })}
+                            type="text"
+                            name="otp"
+                            id="otp"
+                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            placeholder="OTP"
+                          />
+                        </div>
+                        <div className="text-center mt-4 ">
+                          <button type="submit" class="uppercase bg-primary hover:bg-green-600 outline-none  text-white font-semibold py-2 px-4 border border-blue-700  rounded w-1/3 ">
+                            Register
+                          </button>
+                          {registering && <CircularProgress />}
+                        </div>
+                      </form>}
+                      {!recaptchaClose && <div className="py-4">
+                        <div id="recaptcha" className="mx-auto w-1/2"></div>
+                      </div>}
+
+                      <div className="text-center pt-3">
+                        <button onClick={handleLoginOpen} class="text-xs  text-gray-400 font-semibold  px-4 ">
+                          Resend OTP
+                        </button>
+                      </div>
+                      <div className="text-center pt-3">
+                        <button onClick={handleLoginOpen} class="text-xs text-gray-400 font-semibold  px-4   ">
+                          Already registered ? Login
+                        </button>
+                      </div>
+
+                    </div>
+                  </div>
+                </Dialog>
+
+                <button onClick={handleLogout} class="bg-primary hover:bg-green-600 outline-none  text-white font-bold py-2 px-4 border border-blue-700  rounded-full ">
+                  Logout
+                </button>
 
               </div>
             </div>
@@ -590,4 +811,22 @@ function Navigation() {
   )
 }
 
-export default Navigation;
+
+// const mapStateToProps = state => {
+//   return {
+//     authentication: state.authentication    
+//   }
+// }
+
+// const mapDispatchToProps = dispatch => {
+//   return {
+//     userLogin: () => dispatch(userActions.login(phone_number,from)),   
+//   }
+// }
+
+export default Navigation
+
+
+
+
+
