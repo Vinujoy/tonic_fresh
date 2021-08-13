@@ -7,7 +7,8 @@ import {
   const initialState = {
     loading: false,
     featureData: [],
-    error: ''
+    error: '',
+    fetched:false
   }
   
   const featureReducer = (state = initialState, action) => {
@@ -20,6 +21,7 @@ import {
       case FETCH_FEATURE_PRODUCT_SUCCESS:
         return {
           loading: false,
+          fetched:true,
           featureData: action.payload,
           error: ''
         }

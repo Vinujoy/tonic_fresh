@@ -1,15 +1,17 @@
 import { combineReducers } from 'redux'
 import homeReducer from './home/homeReducer'
 import featureReducer from './featureProduct/featureProductReducer'
-import { authentication,registration } from './user/userReducers'
-import {alert} from './alert/alertReducers'
+import { authentication, registration } from './user/userReducers'
+import { productGetById } from './product/productReducers'
+import { alert } from './alert/alertReducers'
 
-const rootReducer = combineReducers({  
+const rootReducer = combineReducers({
   home: homeReducer,
-  featureProduct:featureReducer,
+  featureProduct: featureReducer,
   authentication,
   alert,
-  registration
+  registration,
+  productGetById
 })
 
 export default rootReducer

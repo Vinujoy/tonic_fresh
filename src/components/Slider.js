@@ -10,9 +10,9 @@ function Slider({ items }) {
     console.log("slider items", items);
 
     return (
-        <Carousel autoPlay showStatus={false} showArrows={true}>
+        <Carousel autoPlay showStatus={false} showArrows={true} dynamicHeight ={true}>
             {
-                items.map((item, i) => <Item key={i} item={item} />)
+                items.map((item, i) => <Item key={i} item={item}  />)
             }
         </Carousel>
     )
@@ -21,7 +21,7 @@ function Slider({ items }) {
 function Item({ item }) {
     return (
         <div>
-            <img alt="h-10" src={item.image_url} />
+            <img className ="h-screen object-cover" alt="" src={item.image_url} />
             <div className="legend  mb-20 ">
                 <h1 className="text-5xl uppercase text-white font-bold">{item.title}</h1>
                 <p className="text-2xl pt-10  text-center">
