@@ -23,7 +23,7 @@ function CategoryTab(props) {
 
     return (
 
-        <div className="grid grid-cols-8 py-8 mx-auto ">
+        <div className="grid grid-cols-8 py-8 mx-auto  text-center">
             {items.map((category) => (
                 <Link key={category.id} to={{
                     pathname: "/category", aboutProps: {

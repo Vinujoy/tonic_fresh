@@ -12,12 +12,13 @@ import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles({
     root: {
-        maxWidth: 345,
+        maxWidth: 250,
+        height:320,
         borderRadius:'20px',
         backgroundColor:'#F6FFFA'
     },
     media: {
-        height: 200,
+        height: 150,
     },
 });
 
@@ -35,20 +36,20 @@ function ViewCard(props) {
                 <CardContent>
                     <div className="hover:cursor-pointer text-gray-900 font-semibold text-base tracking-tight uppercase">{product.name}</div>
                     <div className="grid grid-cols-12 gap-4">
-                        <div className="col-span-9 hover:cursor-pointer py-2 text-gray-900 font-semibold text-large tracking-tight uppercase">                            
+                        {/* <div className="col-span-9 hover:cursor-pointer py-2 text-gray-900 font-semibold text-large tracking-tight uppercase">                            
                             <div  dangerouslySetInnerHTML={{ __html: product.short_description }} />
-                        </div>
-                        <div className="col-span-3 hover:cursor-pointer py-2 text-gray-900 font-semibold text-sm tracking-tight text-right">
-                            {`${product.weight} ${product.weight_label}`}
-                        </div>
-                        <div className="col-span-12 hover:cursor-pointer  text-gray-900  text-xs tracking-tight ">                           
+                        </div> */}                        
+                        {/* <div className="col-span-12 hover:cursor-pointer  text-gray-900  text-xs tracking-tight ">                           
                            <div  dangerouslySetInnerHTML={{ __html: product.description }} />
-                        </div>
-                        <div className="col-span-12 hover:cursor-pointer  text-gray-900 font-bold text-base tracking-tight uppercase">
+                        </div> */}
+                        <div className="col-span-6 hover:cursor-pointer  text-gray-900 font-bold text-base tracking-tight uppercase">
                             {product.formated_price}
                         </div>
-                        <div className="col-span-10">
-                            <button class="bg-primary hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">
+                        <div className="col-span-6 hover:cursor-pointer text-gray-900 font-semibold text-sm tracking-tight text-right">
+                            {`${product.weight} ${product.weight_label}`}
+                        </div>
+                        <div className="col-span-10 ">
+                            <button class="bg-primary hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg ">
                                 Add to Cart
                             </button>
                         </div>

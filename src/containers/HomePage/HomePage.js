@@ -1,7 +1,8 @@
 import React, { useEffect, Component } from 'react'
-import { connect , } from 'react-redux'
+import { connect, } from 'react-redux'
 import { useDispatch, useSelector } from 'react-redux';
 import ScrollMenu from 'react-horizontal-scrolling-menu';
+import Skeleton from 'react-loading-skeleton';
 import { fetchHome } from '../../redux'
 import { fetchFeatureProducts } from '../../redux'
 import Slider from '../../components/Slider';
@@ -46,7 +47,7 @@ function HomePage({ home, fetchHome, featureProduct, fetchFeatureProducts }) {
   // console.log(categories);
 
   return home.loading ? (
-    <h2>Loading</h2>
+    <div><Skeleton height={500}  /></div>
   ) : home.error ? (
     <h2>{home.error}</h2>
   ) : (
@@ -66,28 +67,28 @@ function HomePage({ home, fetchHome, featureProduct, fetchFeatureProducts }) {
           ))}
         </div>} */}
       {home &&
-        home.homeData && <div className="container mx-auto px-40">
+        home.homeData && <div className="container mx-auto px-10 md:px-40">
           <CategoryTab items={home.homeData.categories} />
         </div>}
       {home &&
         home.homeData && <Slider items={home.homeData.sliders} />}
       <div className="container mx-auto lg:px-40">
         <div className="grid grid-cols-4 gap-4">
-          <div className="col-span-4 md:col-span-4 lg:col-span-1 ">
+          <div className="col-span-4 md:col-span-4 lg:col-span-1  px-10 md:px-0 ">
             <div className=" py-4 px-8 bg-white shadow-lg rounded-lg my-20 bg-green-50 rounded-lg">
               <Link to="/about">
                 <CustomCard title={refer_a_friend} description={refer_a_friend_description} />
               </Link>
             </div>
           </div>
-          <div className="col-span-4 md:col-span-4 lg:col-span-1">
+          <div className="col-span-4 md:col-span-4 lg:col-span-1  px-10 md:px-0 ">
             <div className=" py-4 px-8 bg-white shadow-lg rounded-lg my-20 bg-green-50 rounded-lg">
               <Link to="/about">
                 <CustomCard title={point_scheme} description={point_scheme_description} />
               </Link>
             </div>
           </div>
-          <div className="col-span-4 md:col-span-4 lg:col-span-1">
+          <div className="col-span-4 md:col-span-4 lg:col-span-1  px-10 md:px-0 ">
             <div className=" py-4 px-8 bg-white shadow-lg rounded-lg my-20 bg-green-50 rounded-lg">
               <Link to="/about" >
                 <CustomCard title={become_a_vip_member} description={become_a_vip_member_description} />
@@ -113,8 +114,8 @@ function HomePage({ home, fetchHome, featureProduct, fetchFeatureProducts }) {
         </div>}
         {home &&
           home.homeData && <div>
-            <div className="text-left uppercase text-lg text-green-800 border-b-2 border-green-700 pt-8"> Shop By Category</div>
-            <div className="grid grid-cols-4 gap-8 pt-8">
+            <div className="text-left uppercase text-lg text-green-700 font-semibold  pt-10"> Shop By Category</div>
+            <div className="grid grid-cols-4 gap-8 pt-4">
               {home.homeData.categories.map((category) => (
                 <Link to={{
                   pathname: "/category", aboutProps: {

@@ -97,7 +97,7 @@ const navigation = {
 function Footer() {
     return (
         <footer className="bg-white">
-            <div className="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+            <div className=" mx-auto py-12 overflow-hidden ">
                 <nav className="-mx-5 -my-2 flex flex-wrap justify-center uppercase p-4 bg-primary" aria-label="Footer">
                     {navigation.main.map((item) => (
                         <div key={item.name} className="px-5 py-2">

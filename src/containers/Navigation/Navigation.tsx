@@ -729,9 +729,9 @@ function Navigation() {
                   </div>
                 </Dialog>
 
-                <button onClick={handleLogout} class="bg-primary hover:bg-green-600 outline-none  text-white font-bold py-2 px-4 border border-blue-700  rounded-full ">
+                {/* <button onClick={handleLogout} class="bg-primary hover:bg-green-600 outline-none  text-white font-bold py-2 px-4 border border-blue-700  rounded-full ">
                   Logout
-                </button>
+                </button> */}
 
               </div>
             </div>

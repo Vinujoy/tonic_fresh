@@ -11,8 +11,8 @@ function FeatureList(props) {
 
 
                 <div key={item.title} >
-                    <div className="text-left uppercase text-lg text-green-800 pt-8 pb-6"> {item.title}</div>
-                    <div className="grid grid-cols-4 gap-4 ">
+                    <div className="text-left uppercase text-lg text-green-600 pt-8 pb-6"> {item.title}</div>
+                    <div className="grid grid-cols-4 gap-2 ">
                         {item.products.map((product) => (
                             <div key={product.id} className="col-span-2 mx-auto md:col-span-1 ">
                                 <Link to={{
